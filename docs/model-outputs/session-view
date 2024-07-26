@@ -1,0 +1,21 @@
+Leitner Session Report for 2024-06-26
+
+Box 1 (Daily Review):
+- path/to/card1
+- path/to/card2
+- ...
+
+Box 2 (Every 2 Days - Due Today):
+- path/to/card3
+- ...
+
+Box 3 (Weekly - Not Due Today):
+(No cards)
+
+Box 4 (Biweekly - Not Due Today):
+(No cards)
+
+Box 5 (Monthly - Not Due Today):
+(No cards)
+
+To review a card, run:

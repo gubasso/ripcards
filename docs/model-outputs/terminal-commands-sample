@@ -1,0 +1,18 @@
+$ ripc
+Question: What is the capital of France?
+(Card ID: path/to/card1)
+
+$ ripc --show-answer
+Answer: Paris
+
+$ ripc --correct/-c
+Correct! Card 'path/to/card1' moved to Box 2.
+
+Question: What is the capital of France?
+Answer: Paris
+
+$ ripc --incorrect/-i
+Incorrect. Card 'path/to/card2' moved back to Box 1.
+
+Question: What is the largest planet in our solar system?
+Answer: Jupiter

@@ -1,0 +1,22 @@
+# /ripc/sessions/<iso-date>.toml
+# /ripc/sessions/2024-06-25.toml
+[leitner.state]
+box = 1
+idx = 0
+
+[leitner.boxes.todo]
+1 = [
+    "card/id/which/is/the/dir/path/for/the/cards/ripicard.toml/",
+    "card/id/2",
+    "card/id/3"
+] # array of card's ids in box 1
+2 = [...]
+(...)
+5 = [...]
+
+[leitner.boxes.done]
+1 = []
+2 = []
+3 = []
+4 = []
+5 = []

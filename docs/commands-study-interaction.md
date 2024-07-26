@@ -1,41 +1,58 @@
 # Commands: Study Interaction
 
-`ripc`
+## `ripc`
 
 - if not session file -> `ripc session start`
+- get next card `ripc --skip`
+  1. go from box 1 to 5 `session_file.leitner.state.box`
+  2. in box: get range of array position `session_file.leitner.state.idx`
+  3. index: random number between cards array range
 - Prints info about the next card that has to be studied
 - Prints out the `question_file` (read at `ripcard.toml`)
 
-`ripc --show-answer`
+## `ripc --show-answer`
 
-- Shows the cards answer to be checked
+- Shows the current cards answer file
 
-`ripc -c / -i`
+## `ripc --show-all`
 
-- Mark that card as answered correctly (`-y`) or incorrectly (`-n`)
-- Print out the question and the answer
-- Print `ripc session progress --compact`
-- Update card state
-- Update session state
-- Print the new card status
+- Shows the current cards data, question and answer
 
-```
-$ ripc
-Question: What is the capital of France?
-(Card ID: path/to/card1)
+## `ripc --correct/-c`
 
-$ ripc --show-answer
-Answer: Paris
+- `ripcard.toml`:
+  - box += 1
+  - review_history.push(last_review)
+  - last_review = { [next_review]: "correct" }
+  - next_review += `config.leitner.boxes[box][random_arr_pos]`
+  - runs `ripc --show-all`
+  - runs `ripc session progress --compact`
+  - update session state: todo -> done
 
-$ ripc --correct/-c
-Correct! Card 'path/to/card1' moved to Box 2.
+## `ripc --incorrect/-i`
 
-Question: What is the capital of France?
-Answer: Paris
+- `ripcard.toml`:
+  - box = 1
+  - review_history.push(last_review)
+  - last_review = { [next_review]: "incorrect" }
+  - next_review += `config.leitner.boxes[box][random_arr_pos]`
+  - runs `ripc --show-all`
+  - runs `ripc session progress --compact`
+  - update session state: todo -> done
 
-$ ripc --incorrect/-i
-Incorrect. Card 'path/to/card2' moved back to Box 1.
+## `ripc --next`
 
-Question: What is the largest planet in our solar system?
-Answer: Jupiter
-```
+- get another random number for the index
+
+## `ripc --skip`
+
+- if `leitner.state` is empty
+  - `leitner.state.box` = 1
+  - `leitner.state.idx` = random(leitner.boxes.todo[leitner.state.box].range())
+- if `leitner.state` has data
+  - mark current card as done
+  - go to the next card
+    - `leitner.state.box` += 1
+    - `leitner.state.idx` = random(leitner.boxes.todo[leitner.state.box].range())
+
+
