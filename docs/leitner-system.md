@@ -22,6 +22,15 @@ The core idea is to sort flashcards into different boxes or levels based on how 
 - Box 4: Every 2 weeks
 - Box 5: Once per month
 
+The intervals can be adjusted based on the learner's needs.
+
+### Process
+
+1. **Initial Placement**: Place all flashcards into the first box at the start.
+2. **Reviewing**: Begin reviewing the flashcards in the first box.
+    - If you recall the answer correctly, move the card to the next box.
+    - If you answer incorrectly, move the card back to the first box or keep it in the same box.
+
 ## Studying and Moving Cards
 
 When you review cards in a box, move them between boxes based on how well you know them:

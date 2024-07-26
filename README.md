@@ -8,7 +8,7 @@
 
 ## Spaced repetition methods
 
-- [ ] [[leitner-system]]
-- [ ] https://docs.rs/fsrs/latest/fsrs/
+- [ ] [Leitner System](/docs/leitner-system.md)
+- [ ] [FSRS](https://docs.rs/fsrs/latest/fsrs/)
 
 
