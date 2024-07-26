@@ -1,0 +1,17 @@
+# Commands: New Cards
+
+All cards created must go in Box 1
+
+`ripc new [path]`
+
+- Creates a new card file `ripicard.toml` with default info
+- Creates the defaults `question.md` and `answer.md` file
+
+`ripc init [path]`
+
+- Creates a new empty card file (just basic fields filled)
+
+`[path]`
+
+- If not specified, creates current dir (where the command is executed)
+
