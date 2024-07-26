@@ -49,7 +49,6 @@ ripc --correct/-c
 ripc --incorrect/-i
 ```
 
-
 [Session Subcommands](/docs/commands-session.md)
 
 ```sh

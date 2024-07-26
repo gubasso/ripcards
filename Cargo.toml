@@ -9,3 +9,7 @@ edition = "2021"
 anyhow = "1.0.86"
 clap = "4.5.11"
 toml = "0.8.16"
+
+[[bin]]
+name = "ripc"
+path = "src/main.rs"
