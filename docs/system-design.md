@@ -29,12 +29,16 @@
 
 ## Commands: Individual Terminal
 
+Initialize repository with RipCards files and dir structures
+
+```sh
+ripc init
+```
+
 [New Cards](/docs/commands-new-cards.md)
 
 ```sh
-# Main command
 ripc new [path]
-ripc init [path]
 ```
 
 [Study Interaction](/docs/commands-study-interaction.md)

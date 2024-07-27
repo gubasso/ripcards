@@ -10,6 +10,7 @@ All cards created must go in Box 1
 `ripc init [path]`
 
 - Creates a new empty card file (just basic fields filled)
+- `ripcard.toml`
 
 `[path]`
 
