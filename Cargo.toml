@@ -7,9 +7,17 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1.0.86"
+chrono = { version = "0.4.38" }
 clap = { version = "4.5.11", features = ["derive"] }
+cmd_lib = "1.9.4"
+serde = { version = "1.0.204", features = ["derive"] }
+serde_with = "3.9.0"
 toml = "0.8.16"
+walkdir = "2.5.0"
 
 [[bin]]
 name = "ripc"
 path = "src/main.rs"
+
+[dev-dependencies]
+tempfile = "3.10.1"

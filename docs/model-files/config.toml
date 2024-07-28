@@ -2,9 +2,17 @@
 method = 'leitner'
 no-color = false
 
-[leitner.boxes]
-1 = { delta_days: [1] }
-2 = { delta_days: [2, 3] }
-3 = { delta_days: [7] }
-4 = { delta_days: [14] }
-5 = { delta_days: [30] }
+[[method.leitner.boxes]]
+delta_days = [1]
+
+[[method.leitner.boxes]]
+delta_days = [2, 3]
+
+[[method.leitner.boxes]]
+delta_days = [7]
+
+[[method.leitner.boxes]]
+delta_days = [14]
+
+[[method.leitner.boxes]]
+delta_days = [30]

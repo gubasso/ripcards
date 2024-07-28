@@ -3,12 +3,12 @@ question_file = "question.md" # default
 answer_file = "answer.md" # default
 tags = ["biology", "chapter1"] # optional
 
-[leitner]
-box = 1
-next_review = { "2024-06-27": "" }
-last_review = { "2024-06-25": "correct" }
+[method.leitner]
+box_idx = 0 # 0..=4 (5 total boxes)
+next_review = { date = "2024-06-25", answer = "" }
+last_review = { date = "2024-06-25", answer = "correct" }
 review_history = [
-    { "2024-06-20": "correct" },
-    { "2024-06-21": "incorrect" },
-    { "2024-06-24": "correct" },
+    { date = "2024-06-20", answer = "correct" },
+    { date = "2024-06-21", answer = "incorrect" },
+    { date = "2024-06-24", answer = "correct" },
 ]

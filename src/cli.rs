@@ -21,11 +21,11 @@ pub enum Subcommands {
     /// Initialize repository with RipCards files and dir structures
     Init,
     /// Creates all basic cards files with default values
-    New(CreateCardsArgs),
+    New(NewCardArgs),
 }
 
 #[derive(Debug, Args)]
-pub struct CreateCardsArgs {
+pub struct NewCardArgs {
     /// Path of the dir that will be set as a card. If not specified, executes
     /// in the current dir (where the command is executed)
     pub path: Option<PathBuf>,
