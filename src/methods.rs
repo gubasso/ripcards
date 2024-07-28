@@ -2,7 +2,7 @@ use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
 use serde_with::{serde_as, DisplayFromStr};
 
-#[derive(Serialize, Deserialize, strum::Display)]
+#[derive(Serialize, Deserialize, strum::Display, Debug, PartialEq)]
 #[serde(rename_all = "lowercase")]
 #[strum(serialize_all = "lowercase")]
 pub enum MethodEnum<T> {
@@ -31,10 +31,10 @@ impl Default for MethodConfig {
     }
 }
 
-#[derive(Serialize, Deserialize, Default)]
+#[derive(Serialize, Deserialize, Default, Debug, PartialEq)]
 struct BoxIdx(usize);
 
-#[derive(Serialize, Deserialize, Default)]
+#[derive(Serialize, Deserialize, Default, Debug, PartialEq)]
 pub struct LeitnerCardProperties {
     box_idx: BoxIdx,
     next_review: Option<LeitnerReview>,
@@ -43,7 +43,7 @@ pub struct LeitnerCardProperties {
 }
 
 #[serde_as]
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug, PartialEq)]
 struct LeitnerReview {
     #[serde_as(as = "DisplayFromStr")]
     date: NaiveDate,
@@ -57,7 +57,7 @@ enum LeitnerAnswers {
     Incorret,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug, PartialEq)]
 pub struct LeitnerConfigProperties {
     boxes: (BoxProp, BoxProp, BoxProp, BoxProp, BoxProp),
 }
@@ -76,7 +76,7 @@ impl Default for LeitnerConfigProperties {
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug, PartialEq)]
 struct BoxProp {
     delta_days: Vec<u16>,
 }

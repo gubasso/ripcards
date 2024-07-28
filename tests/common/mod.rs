@@ -4,7 +4,7 @@ use anyhow::Result;
 use ripcards::handlers::handle_init;
 use tempfile::tempdir;
 
-pub fn setup_temp_dir() -> Result<PathBuf> {
+pub fn setup_temp_dir_handle_init() -> Result<PathBuf> {
     let temp_dir = tempdir()?;
     set_current_dir(&temp_dir)?;
     create_dir(".git")?;

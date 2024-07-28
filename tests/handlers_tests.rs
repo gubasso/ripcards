@@ -2,15 +2,18 @@ mod common;
 
 use std::{
     env::set_current_dir,
-    fs::{create_dir, create_dir_all},
+    fs::{create_dir_all, read_to_string},
     path::{Path, PathBuf},
 };
 
 use anyhow::Result;
+use cmd_lib::run_fun;
 use common::setup_temp_dir;
 use ripcards::{
     cli::{NewCardArgs, SessionMethodArgs},
+    config::Config,
     handlers::{handle_init, handle_new_card, handle_session_start},
+    msgs::GIT_COMMIT_MSG_RIPC_INIT,
 };
 use tempfile::tempdir;
 
@@ -18,26 +21,28 @@ use tempfile::tempdir;
 fn test_handle_init() -> Result<()> {
     let temp_dir = tempdir()?;
     set_current_dir(&temp_dir)?;
-    create_dir(".git")?;
     handle_init()?;
-    let ripc_dir = temp_dir.path().join("ripc");
-    assert!(ripc_dir.is_dir());
-    let sessions_dir = ripc_dir.join("sessions");
-    assert!(sessions_dir.is_dir());
-    let config_file = ripc_dir.join("config.toml");
-    assert!(config_file.is_file());
-    Ok(())
-}
+    let gitkeep_path_str = "ripc/sessions/.gitkeep";
+    let config_path_str = "ripc/config.toml";
 
-#[test]
-fn test_handle_init_must_git_and_root() -> Result<()> {
-    let temp_dir = tempdir()?;
-    set_current_dir(&temp_dir)?;
-    let handle_init_res = handle_init();
+    let config_content = read_to_string(config_path_str)?;
+    let config: Config = toml::from_str(&config_content)?;
+    assert_eq!(config, Config::default());
+
     assert!(
-        handle_init_res.is_err(),
-        "ripc init must return error if is not executed at the root of a git repository"
+        Path::new(".git").is_dir(),
+        "Git repository must be initialized."
     );
+    assert!(Path::new(gitkeep_path_str).is_file());
+    assert!(Path::new(config_path_str).is_file());
+
+    let out_git_status = run_fun!(git status --porcelain)?;
+    assert!(!out_git_status.contains(gitkeep_path_str));
+    assert!(!out_git_status.contains(config_path_str));
+
+    let out_git_log = run_fun!(git log --oneline)?;
+    assert!(out_git_log.contains(GIT_COMMIT_MSG_RIPC_INIT));
+
     Ok(())
 }
 
