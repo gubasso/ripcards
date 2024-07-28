@@ -8,45 +8,57 @@
 - [ ] for each file match, test if exists a question and answer file
   - if not: print that inconsistency, don't include as a valid card
 
+- [x] new card: will create a path if it doesn't exists
+
 
 ```rs
-use walkdir::WalkDir;
-use std::fs;
-use std::path::{Path, PathBuf};
-use anyhow::Result;
+#[test]
+fn test_find_cards_with_matches() -> Result<()> {
+    let (temp_dir, curr_dir) = setup_test_directory()?;
+    create_test_files(&curr_dir)?;
 
-fn find_dirs_with_ripcard_and_method_leitner(root: &Path) -> Result<Vec<PathBuf>> {
-    let mut matching_dirs = Vec::new();
+    let cards = find_cards(&curr_dir, None)?;
 
-    for entry in WalkDir::new(root)
-        .into_iter()
-        .filter_map(|e| e.ok()) // Filter out errors
-        .filter(|e| e.file_type().is_file()) // Include only files
-        .filter(|e| e.file_name() == "ripcard.toml") // Include only files named "ripcard.toml"
-    {
-        let content = fs::read_to_string(entry.path())?;
-        if content.contains("[method.leitner]") {
-            if let Some(parent_dir) = entry.path().parent() {
-                matching_dirs.push(parent_dir.to_path_buf());
-            }
-        }
-    }
+    let correct_matches = HashSet::from([
+        curr_dir.join("p1/pb"),
+        curr_dir.join("p1/pa/px"),
+        curr_dir.join("p2"),
+        curr_dir.join("p2/pa"),
+    ]);
 
-    Ok(matching_dirs)
+    assert_eq!(cards, correct_matches, "Found cards do not match expected cards");
+
+    // Ensure the TempDir is not dropped prematurely
+    drop(temp_dir);
+
+    Ok(())
 }
 
-fn main() -> Result<()> {
-    let root = std::env::current_dir()?;
-    let matching_dirs = find_dirs_with_ripcard_and_method_leitner(&root)?;
+#[test]
+fn test_find_cards_no_matches() -> Result<()> {
+    let (temp_dir, curr_dir) = setup_test_directory()?;
 
-    if matching_dirs.is_empty() {
-        println!("No matching directories found.");
-    } else {
-        println!("Found matching directories:");
-        for dir in matching_dirs {
-            println!("{}", dir.display());
-        }
-    }
+    // Create only non-matching files
+    write(curr_dir.join("p1/ripcard.toml"), "lala")?;
+    write(curr_dir.join("p1/pa/ripcard.toml"), "[method.other]")?;
+
+    let cards = find_cards(&curr_dir, None)?;
+
+    assert!(cards.is_empty(), "Expected no cards to be found");
+
+    drop(temp_dir);
+
+    Ok(())
+}
+
+#[test]
+fn test_find_cards_empty_directory() -> Result<()> {
+    let temp_dir = tempdir()?;
+    let curr_dir = temp_dir.path().to_path_buf();
+
+    let cards = find_cards(&curr_dir, None)?;
+
+    assert!(cards.is_empty(), "Expected no cards in an empty directory");
 
     Ok(())
 }

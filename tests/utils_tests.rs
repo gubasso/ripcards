@@ -1,3 +1,5 @@
+mod common;
+
 use std::{
     collections::HashSet,
     env::set_current_dir,
@@ -5,18 +7,22 @@ use std::{
     path::PathBuf,
 };
 
+use common::setup_temp_dir;
+
 use anyhow::Result;
 use ripcards::utils::find_cards;
-use tempfile::tempdir;
 
-#[test]
-fn test_find_cards() -> Result<()> {
-    let temp_dir = tempdir()?;
-    set_current_dir(&temp_dir)?;
-    let curr_dir = temp_dir.path();
+fn create_mock_dirs() -> Result<()> {
     create_dir_all("p1/pa/px")?;
     create_dir_all("p1/pb/pz")?;
     create_dir_all("p2/pa/pt")?;
+    Ok(())
+}
+
+#[test]
+fn test_find_cards() -> Result<()> {
+    let proj_root = setup_temp_dir()?;
+    create_mock_dirs()?;
     // no match
     write("p1/ripcard.toml", "lala")?;
     write("p1/pa/ripcard.toml", "[method.other]")?;

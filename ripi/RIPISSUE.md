@@ -1,5 +1,7 @@
 # RIPISSUE
 
+- review commands and implement the directory traversal that git implements... (until the system root)
+  - ripc init
 - [implement_ripc_session_start](/ripi/Issue/implement_ripc_session_start/description.md)
   |> ripc (basic command)
 

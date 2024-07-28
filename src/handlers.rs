@@ -3,7 +3,7 @@ use std::{
     path::PathBuf,
 };
 
-use anyhow::{bail, Result};
+use anyhow::Result;
 use toml::to_string;
 
 use crate::{
@@ -25,9 +25,7 @@ pub fn handle_init() -> Result<()> {
 pub fn handle_new_card(args: &NewCardArgs) -> Result<()> {
     let curr_dir = PathBuf::from(".");
     let path = args.path.as_ref().unwrap_or(&curr_dir);
-    if !path.is_dir() {
-        bail!("Card path is not a valid directory.")
-    }
+    create_dir_all(path)?;
     let card = Card::default();
     let card_str = to_string(&card)?;
     let ripcard_path = path.join("ripcard.toml");
