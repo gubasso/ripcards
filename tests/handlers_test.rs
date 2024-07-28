@@ -6,8 +6,8 @@ use std::{
 
 use anyhow::Result;
 use ripcards::{
-    cli::NewCardArgs,
-    handlers::{handle_init, handle_new_card},
+    cli::{NewCardArgs, SessionMethodArgs},
+    handlers::{handle_init, handle_new_card, handle_session_start},
 };
 use tempfile::{tempdir, TempDir};
 
@@ -105,4 +105,22 @@ fn test_handle_new_card_with_invalid_path() -> Result<()> {
         "If path passed does not exists, it must return an error."
     );
     Ok(())
+}
+
+#[test]
+fn test_handle_session_start_must_git_root() -> Result<()> {
+    let temp_dir = tempdir()?;
+    set_current_dir(&temp_dir)?;
+    let args = SessionMethodArgs { method: None };
+    let res = handle_session_start(&args);
+    assert!(
+        res.is_err(),
+        "ripc session start must return error if is not executed at the root of a git repository"
+    );
+    Ok(())
+}
+
+#[test]
+fn test_handle_session_start() -> Result<()> {
+    todo!()
 }

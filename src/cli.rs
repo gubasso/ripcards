@@ -44,11 +44,11 @@ pub enum SessionSubcommands {
 pub struct SessionMethodArgs {
     /// Select the spaced repetition method for this study session
     #[arg(long, short)]
-    method: MethodOptions,
+    pub method: Option<MethodOptions>,
 }
 
 #[derive(Debug, ValueEnum, Clone)]
-enum MethodOptions {
+pub enum MethodOptions {
     Leitner,
 }
 
