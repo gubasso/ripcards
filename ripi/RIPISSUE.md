@@ -1,7 +1,7 @@
 # RIPISSUE
 
-- ripc session start
-- ripc (basic command)
+- [[implementripcsessionstart-issue]]
+  |> ripc (basic command)
 
 ## backlog
 

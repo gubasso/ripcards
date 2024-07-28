@@ -8,7 +8,10 @@ use anyhow::{bail, Result};
 use toml::to_string;
 
 use crate::{
-    cards::Card, cli::NewCardArgs, config::Config, msgs::error::ERROR_MSG_NOT_PROJECT_ROOT,
+    cards::Card,
+    cli::{NewCardArgs, SessionMethodArgs, SessionProgressArgs},
+    config::Config,
+    msgs::error::ERROR_MSG_NOT_PROJECT_ROOT,
 };
 
 pub fn handle_init() -> Result<()> {
@@ -36,5 +39,13 @@ pub fn handle_new_card(args: &NewCardArgs) -> Result<()> {
     write(question_path, "# Question\n")?;
     let answer_path = path.join("answer.md");
     write(answer_path, "# Answer\n")?;
+    Ok(())
+}
+
+pub fn handle_session_start(_args: &SessionMethodArgs) -> Result<()> {
+    todo!()
+}
+
+pub fn handle_session_progress(_args: &SessionProgressArgs) -> Result<()> {
     Ok(())
 }

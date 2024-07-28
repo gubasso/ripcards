@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use clap::{Args, Parser, Subcommand};
+use clap::{Args, Parser, Subcommand, ValueEnum};
 
 /// RipCards: Flash Cards for your terminal
 #[derive(Debug, Parser)]
@@ -22,6 +22,9 @@ pub enum Subcommands {
     Init,
     /// Creates all basic cards files with default values
     New(NewCardArgs),
+    /// Study Session management
+    #[command(subcommand)]
+    Session(SessionSubcommands),
 }
 
 #[derive(Debug, Args)]
@@ -29,4 +32,31 @@ pub struct NewCardArgs {
     /// Path of the dir that will be set as a card. If not specified, executes
     /// in the current dir (where the command is executed)
     pub path: Option<PathBuf>,
+}
+
+#[derive(Debug, Subcommand)]
+pub enum SessionSubcommands {
+    Start(SessionMethodArgs),
+    Progress(SessionProgressArgs),
+}
+
+#[derive(Debug, Args)]
+pub struct SessionMethodArgs {
+    /// Select the spaced repetition method for this study session
+    #[arg(long, short)]
+    method: MethodOptions,
+}
+
+#[derive(Debug, ValueEnum, Clone)]
+enum MethodOptions {
+    Leitner,
+}
+
+#[derive(Debug, Args)]
+pub struct SessionProgressArgs {
+    /// Select the spaced repetition method for this study session
+    #[arg(long, short)]
+    compact: MethodOptions,
+    #[command(flatten)]
+    pub method_args: SessionMethodArgs,
 }
