@@ -1,6 +1,8 @@
 # RIPISSUE
 
-- [[implementnewandinitcardscommand-issue]]
+- ripc init
+- ripc session start
+- ripc (basic command)
 
 ## backlog
 

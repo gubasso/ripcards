@@ -1,0 +1,1 @@
+# ripc_init_condition_to_project_root_git_repository (Issue)

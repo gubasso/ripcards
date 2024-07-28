@@ -1,4 +1,5 @@
 use std::{
+    env::current_dir,
     fs::{create_dir_all, write},
     path::PathBuf,
 };
@@ -6,9 +7,10 @@ use std::{
 use anyhow::Result;
 use toml::to_string;
 
-use crate::{cards::Card, cli::NewCardArgs, config::create_config_file};
+use crate::{cards::Card, cli::NewCardArgs, config::create_config_file, context::Context};
 
 pub fn handle_init() -> Result<()> {
+    let _ctx = Context::new(current_dir()?);
     create_dir_all("ripc/sessions")?;
     create_config_file()?;
     Ok(())
