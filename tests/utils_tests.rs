@@ -4,10 +4,8 @@ use std::{
     collections::HashSet,
     env::set_current_dir,
     fs::{create_dir, create_dir_all, write, File},
-    path::PathBuf,
 };
 
-use cmd_lib::run_cmd;
 use common::setup_temp_dir_handle_init;
 
 use anyhow::Result;

@@ -4,9 +4,8 @@ use std::{
     path::PathBuf,
 };
 
-use anyhow::Result;
+use anyhow::{bail, Result};
 use cmd_lib::run_cmd;
-use toml::to_string;
 
 use crate::{
     cards::Card,
@@ -19,7 +18,7 @@ use crate::{
 pub fn handle_init() -> Result<()> {
     run_cmd!(git init)?;
     let config = Config::default();
-    let config_content = to_string(&config)?;
+    let config_content = toml::to_string(&config)?;
     let session_dir = "ripc/sessions";
     let session_dir_keep = "ripc/sessions/.gitkeep";
     let config_file = "ripc/config.toml";
@@ -33,20 +32,22 @@ pub fn handle_init() -> Result<()> {
 
 pub fn handle_new_card(args: &NewCardArgs) -> Result<()> {
     let curr_dir = PathBuf::from(".");
-    let new_card_path = args.path.as_ref().unwrap_or(&curr_dir);
+    let new_card_rel_path = args.path.as_ref().unwrap_or(&curr_dir);
     let root_path = find_ripc_root()?;
-    set_current_dir(root_path)?;
+    let new_card_path = &root_path.join(new_card_rel_path);
+    set_current_dir(&root_path)?;
+    if &root_path == new_card_path {
+        bail!(
+            "Can not create a new card at root of RipCards project. \
+            A card must be a subdirectory inside the RipCards root directory."
+        );
+    }
     create_dir_all(new_card_path)?;
-    // test until here
-
     let card = Card::default();
-    let card_str = to_string(&card)?;
-    let ripcard_path = new_card_path.join("ripcard.toml");
-    write(ripcard_path, card_str)?;
-    let question_path = new_card_path.join("question.md");
-    write(question_path, "# Question\n")?;
-    let answer_path = new_card_path.join("answer.md");
-    write(answer_path, "# Answer\n")?;
+    let card_str = toml::to_string(&card)?;
+    write(new_card_path.join("ripcard.toml"), card_str)?;
+    write(new_card_path.join("question.md"), "# Question\n\n")?;
+    write(new_card_path.join("answer.md"), "# Answer\n\n")?;
     Ok(())
 }
 
