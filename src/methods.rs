@@ -2,15 +2,32 @@ use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
 use serde_with::{serde_as, DisplayFromStr};
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, strum::Display)]
 #[serde(rename_all = "lowercase")]
-pub enum MethodCard {
-    Leitner(LeitnerCardProperties),
+#[strum(serialize_all = "lowercase")]
+pub enum MethodEnum<T> {
+    Leitner(T),
+}
+
+pub type Method = MethodEnum<()>;
+pub type MethodCard = MethodEnum<LeitnerCardProperties>;
+pub type MethodConfig = MethodEnum<LeitnerConfigProperties>;
+
+impl Default for Method {
+    fn default() -> Self {
+        Method::Leitner(())
+    }
 }
 
 impl Default for MethodCard {
     fn default() -> Self {
         MethodCard::Leitner(LeitnerCardProperties::default())
+    }
+}
+
+impl Default for MethodConfig {
+    fn default() -> Self {
+        Self::Leitner(LeitnerConfigProperties::default())
     }
 }
 
@@ -38,18 +55,6 @@ struct LeitnerReview {
 enum LeitnerAnswers {
     Correct,
     Incorret,
-}
-
-#[derive(Serialize, Deserialize)]
-#[serde(rename_all = "lowercase")]
-pub enum MethodConfig {
-    Leitner(LeitnerConfigProperties),
-}
-
-impl Default for MethodConfig {
-    fn default() -> Self {
-        Self::Leitner(LeitnerConfigProperties::default())
-    }
 }
 
 #[derive(Serialize, Deserialize)]

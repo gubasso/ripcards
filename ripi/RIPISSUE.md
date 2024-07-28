@@ -1,6 +1,6 @@
 # RIPISSUE
 
-- [[implementripcsessionstart-issue]]
+- [implement_ripc_session_start](/ripi/Issue/implement_ripc_session_start/description.md)
   |> ripc (basic command)
 
 - ripc session progress [[implementripcsessionprogress-issue]]

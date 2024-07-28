@@ -12,6 +12,7 @@ clap = { version = "4.5.11", features = ["derive"] }
 cmd_lib = "1.9.4"
 serde = { version = "1.0.204", features = ["derive"] }
 serde_with = "3.9.0"
+strum = { version = "0.26.3", features = ["derive"] }
 toml = "0.8.16"
 walkdir = "2.5.0"
 

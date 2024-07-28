@@ -1,5 +1,4 @@
 use std::{
-    env::current_dir,
     fs::{create_dir_all, write},
     path::PathBuf,
 };
@@ -11,15 +10,8 @@ use crate::{
     cards::Card,
     cli::{NewCardArgs, SessionMethodArgs, SessionProgressArgs},
     config::Config,
-    msgs::error::ERROR_MSG_NOT_PROJECT_ROOT,
+    utils::{assert_git_repo_root, is_repo_initialized},
 };
-
-fn assert_git_repo_root() -> Result<()> {
-    if !current_dir()?.join(".git").is_dir() {
-        bail!(ERROR_MSG_NOT_PROJECT_ROOT);
-    }
-    Ok(())
-}
 
 pub fn handle_init() -> Result<()> {
     assert_git_repo_root()?;
@@ -28,17 +20,6 @@ pub fn handle_init() -> Result<()> {
     create_dir_all("ripc/sessions")?;
     write("ripc/config.toml", config_string)?;
     Ok(())
-}
-
-fn is_initialized() -> Result<bool> {
-    let current_dir = current_dir()?;
-    let git_dir = current_dir.join(".git");
-    let ripc_dir = current_dir.join("ripc");
-    let config_file = ripc_dir.join("config.toml");
-    let sessions_dir = ripc_dir.join("sessions");
-    let is_initialized =
-        git_dir.is_dir() && ripc_dir.is_dir() && config_file.is_file() && sessions_dir.is_dir();
-    Ok(is_initialized)
 }
 
 pub fn handle_new_card(args: &NewCardArgs) -> Result<()> {
@@ -60,7 +41,7 @@ pub fn handle_new_card(args: &NewCardArgs) -> Result<()> {
 
 pub fn handle_session_start(_args: &SessionMethodArgs) -> Result<()> {
     assert_git_repo_root()?;
-    if !is_initialized()? {
+    if !is_repo_initialized()? {
         handle_init()?;
     }
     // execute the start routine/sequence
