@@ -1,6 +1,5 @@
 # RIPISSUE
 
-- [[ripcinitconditiontoprojectrootgitrepository-issue]]
 - ripc session start
 - ripc (basic command)
 

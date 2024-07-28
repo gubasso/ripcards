@@ -2,6 +2,7 @@
 
 ## `ripc session start [method]`
 
+- Must be a initialized repo `ripc init`
 - Start a new study session.
 - `[method]`: defaults to `leitner`
 
