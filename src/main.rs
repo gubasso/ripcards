@@ -12,7 +12,7 @@ fn main() -> Result<()> {
         Some(Init) => handle_init()?,
         Some(New(args)) => handle_new_card(args)?,
         None => {}
-    }
+    };
 
     Ok(())
 }
