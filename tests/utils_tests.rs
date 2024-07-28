@@ -47,13 +47,28 @@ fn test_is_ripc_root_with_handle_init() -> Result<()> {
 
 #[test]
 fn test_find_ripc_root() -> Result<()> {
-    let temp_dir = tempdir()?;
+    let temp_dir = tempdir()?.into_path();
+    let some_random_subdir = temp_dir.join("some/random/dir");
+    create_dir_all(&some_random_subdir)?;
+
     set_current_dir(&temp_dir)?;
     let res = find_ripc_root();
-    assert!(res.is_err(), "There is no RipCards root");
+    assert!(res.is_err(), "There is no RipCards root to be found.");
+
+    set_current_dir(&some_random_subdir)?;
+    let res = find_ripc_root();
+    assert!(res.is_err(), "There is no RipCards root to be found.");
+
+    set_current_dir(&temp_dir)?;
     handle_init()?;
+
     let ripc_root = find_ripc_root()?;
-    assert_eq!(ripc_root, temp_dir.into_path());
+    assert_eq!(ripc_root, temp_dir);
+
+    set_current_dir(&some_random_subdir)?;
+    let ripc_root = find_ripc_root()?;
+    assert_eq!(ripc_root, temp_dir);
+
     Ok(())
 }
 

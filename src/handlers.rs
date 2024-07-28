@@ -1,4 +1,5 @@
 use std::{
+    env::set_current_dir,
     fs::{create_dir_all, write, File},
     path::PathBuf,
 };
@@ -12,7 +13,7 @@ use crate::{
     cli::{NewCardArgs, SessionMethodArgs, SessionProgressArgs},
     config::Config,
     msgs::GIT_COMMIT_MSG_RIPC_INIT,
-    utils::{assert_git_repo_root, is_repo_initialized},
+    utils::{assert_git_repo_root, find_ripc_root, is_repo_initialized},
 };
 
 pub fn handle_init() -> Result<()> {
@@ -33,7 +34,11 @@ pub fn handle_init() -> Result<()> {
 pub fn handle_new_card(args: &NewCardArgs) -> Result<()> {
     let curr_dir = PathBuf::from(".");
     let new_card_path = args.path.as_ref().unwrap_or(&curr_dir);
+    let root_path = find_ripc_root()?;
+    set_current_dir(root_path)?;
     create_dir_all(new_card_path)?;
+    // test until here
+
     let card = Card::default();
     let card_str = to_string(&card)?;
     let ripcard_path = new_card_path.join("ripcard.toml");

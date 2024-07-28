@@ -8,7 +8,7 @@ use std::{
 
 use anyhow::Result;
 use cmd_lib::run_fun;
-use common::setup_temp_dir;
+use common::setup_temp_dir_handle_init;
 use ripcards::{
     cli::{NewCardArgs, SessionMethodArgs},
     config::Config,
@@ -57,7 +57,7 @@ fn assert_new_card_files(curr_dir: &Path) {
 
 #[test]
 fn test_handle_new_card_with_none_path() -> Result<()> {
-    let proj_root = setup_temp_dir()?;
+    let proj_root = setup_temp_dir_handle_init()?;
     let args = NewCardArgs { path: None };
     handle_new_card(&args)?;
     assert_new_card_files(&proj_root);
@@ -66,7 +66,7 @@ fn test_handle_new_card_with_none_path() -> Result<()> {
 
 #[test]
 fn test_handle_new_card_with_dot_path() -> Result<()> {
-    let proj_root = setup_temp_dir()?;
+    let proj_root = setup_temp_dir_handle_init()?;
     let args = NewCardArgs {
         path: Some(PathBuf::from(".")),
     };
@@ -77,7 +77,7 @@ fn test_handle_new_card_with_dot_path() -> Result<()> {
 
 #[test]
 fn test_handle_new_card_with_some_path() -> Result<()> {
-    let proj_root = setup_temp_dir()?;
+    let proj_root = setup_temp_dir_handle_init()?;
     let some_path = &proj_root.join("card/path");
     create_dir_all(some_path)?;
     let args = NewCardArgs {
