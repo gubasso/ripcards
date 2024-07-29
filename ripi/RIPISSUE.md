@@ -1,6 +1,5 @@
 # RIPISSUE
 
-- implement_git_dir_traversal_pattern [[implementgitdirtraversalpattern-issue]]
 
 - each file manipulation must be in functions that will call git
   - ripc init is integrated with git?
