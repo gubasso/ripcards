@@ -2,6 +2,9 @@
 
 review commands and implement the directory traversal that git implements... (until the system root)
 
+- run tests: correct error cases
+- ripc init is integrated with git?
+- ripc new is integrated with git?
 - [ ] ripc new: check if finds a valid ripcards project root, if not, return an error.
   - implement commented tests
   - cases for different paths as input
