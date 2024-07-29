@@ -51,11 +51,17 @@ fn test_find_ripc_root() -> Result<()> {
 
     set_current_dir(&temp_dir)?;
     let res = find_ripc_root();
-    assert!(res.is_err(), "There is no RipCards root to be found.");
+    assert!(
+        res.is_err(),
+        "The RipCards proj root not found. Repository must be initialized."
+    );
 
     set_current_dir(&some_random_subdir)?;
     let res = find_ripc_root();
-    assert!(res.is_err(), "There is no RipCards root to be found.");
+    assert!(
+        res.is_err(),
+        "The RipCards proj root not found. Repository must be initialized."
+    );
 
     set_current_dir(&temp_dir)?;
     handle_init()?;
@@ -69,22 +75,6 @@ fn test_find_ripc_root() -> Result<()> {
 
     Ok(())
 }
-
-// #[test]
-// fn test_find_ripc_root_at_subdir() -> Result<()> {
-//     let temp_dir = tempdir()?;
-//     set_current_dir(&temp_dir)?;
-//     handle_init()?;
-//
-//
-//
-//
-//     // let res = find_ripc_root();
-//     // assert!(res.is_err(), "There is no RipCards root");
-//     // let ripc_root = find_ripc_root()?;
-//     // assert_eq!(ripc_root, temp_dir.into_path());
-//     Ok(())
-// }
 
 #[test]
 fn test_find_cards() -> Result<()> {

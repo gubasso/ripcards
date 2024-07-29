@@ -1,10 +1,20 @@
 # RIPISSUE
 
 - implement_git_dir_traversal_pattern [[implementgitdirtraversalpattern-issue]]
+
+- each file manipulation must be in functions that will call git
+  - ripc init is integrated with git?
+  - ripc new is integrated with git?
+
+- refactor find_cards:
+  - return a Card type
+
 - [implement_ripc_session_start](/ripi/Issue/implement_ripc_session_start/description.md)
   |> ripc (basic command)
 
 - ripc session progress [[implementripcsessionprogress-issue]]
+
+
 
 ## backlog
 

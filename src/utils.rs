@@ -57,15 +57,3 @@ pub fn assert_git_repo_root() -> Result<()> {
     }
     Ok(())
 }
-
-// remove
-pub fn is_repo_initialized() -> Result<bool> {
-    let current_dir = current_dir()?;
-    let git_dir = current_dir.join(".git");
-    let ripc_dir = current_dir.join("ripc");
-    let config_file = ripc_dir.join("config.toml");
-    let sessions_dir = ripc_dir.join("sessions");
-    let is_initialized =
-        git_dir.is_dir() && ripc_dir.is_dir() && config_file.is_file() && sessions_dir.is_dir();
-    Ok(is_initialized)
-}

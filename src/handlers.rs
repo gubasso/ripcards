@@ -1,5 +1,5 @@
 use std::{
-    env::set_current_dir,
+    env::current_dir,
     fs::{create_dir_all, write, File},
     path::PathBuf,
 };
@@ -12,7 +12,7 @@ use crate::{
     cli::{NewCardArgs, SessionMethodArgs, SessionProgressArgs},
     config::Config,
     msgs::GIT_COMMIT_MSG_RIPC_INIT,
-    utils::{assert_git_repo_root, find_ripc_root, is_repo_initialized},
+    utils::find_ripc_root,
 };
 
 pub fn handle_init() -> Result<()> {
@@ -31,33 +31,35 @@ pub fn handle_init() -> Result<()> {
 }
 
 pub fn handle_new_card(args: &NewCardArgs) -> Result<()> {
-    let curr_dir = PathBuf::from(".");
-    let new_card_rel_path = args.path.as_ref().unwrap_or(&curr_dir);
+    let curr_dir_abs_path = current_dir()?;
+    let dot_dir = PathBuf::from(".");
+    let new_card_rel_path_arg = args.path.as_ref().unwrap_or(&dot_dir);
     let root_path = find_ripc_root()?;
-    let new_card_path = &root_path.join(new_card_rel_path);
-    set_current_dir(&root_path)?;
-    if &root_path == new_card_path {
+    let new_card_abs_path = if new_card_rel_path_arg == &dot_dir {
+        curr_dir_abs_path
+    } else {
+        root_path.join(new_card_rel_path_arg)
+    };
+
+    if root_path == new_card_abs_path {
         bail!(
             "Can not create a new card at root of RipCards project. \
             A card must be a subdirectory inside the RipCards root directory."
         );
     }
-    create_dir_all(new_card_path)?;
+
+    create_dir_all(&new_card_abs_path)?;
     let card = Card::default();
     let card_str = toml::to_string(&card)?;
-    write(new_card_path.join("ripcard.toml"), card_str)?;
-    write(new_card_path.join("question.md"), "# Question\n\n")?;
-    write(new_card_path.join("answer.md"), "# Answer\n\n")?;
+    write(new_card_abs_path.join("ripcard.toml"), card_str)?;
+    write(new_card_abs_path.join("question.md"), "# Question\n\n")?;
+    write(new_card_abs_path.join("answer.md"), "# Answer\n\n")?;
+
     Ok(())
 }
 
 pub fn handle_session_start(_args: &SessionMethodArgs) -> Result<()> {
-    assert_git_repo_root()?;
-    if !is_repo_initialized()? {
-        handle_init()?;
-    }
-    // execute the start routine/sequence
-    Ok(())
+    todo!()
 }
 
 pub fn handle_session_progress(_args: &SessionProgressArgs) -> Result<()> {
