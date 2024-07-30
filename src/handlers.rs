@@ -1,8 +1,4 @@
-use std::{
-    env::current_dir,
-    fs::{write, File},
-    path::PathBuf,
-};
+use std::{env::current_dir, fs::File, path::PathBuf};
 
 use anyhow::{anyhow, bail, Context, Result};
 use cmd_lib::run_cmd;
@@ -12,7 +8,9 @@ use crate::{
     cli::{NewCardArgs, SessionMethodArgs, SessionProgressArgs},
     config::Config,
     msgs::{git_commit_msg_ripc_new, GIT_COMMIT_MSG_RIPC_INIT},
-    utils::{create_directory, find_ripc_root, get_relative_path},
+    utils::{
+        create_directory, find_ripc_root, get_relative_path, git_add_files, write_file_contents,
+    },
 };
 
 pub fn handle_init() -> Result<()> {
@@ -24,7 +22,7 @@ pub fn handle_init() -> Result<()> {
     let config_file = "ripc/config.toml";
     create_directory(session_dir)?;
     File::create(session_dir_keep)?;
-    write(config_file, config_content)?;
+    write_file_contents(config_file, config_content)?;
     run_cmd!(git add "$session_dir_keep" "$config_file")?;
     run_cmd!(git commit -m "$GIT_COMMIT_MSG_RIPC_INIT")?;
     Ok(())
@@ -60,32 +58,17 @@ pub fn handle_new_card(args: &NewCardArgs) -> Result<()> {
         ("answer.md", "# Answer\n\n".to_string()),
     ];
 
-    println!("##### here #######");
-    println!("##### here #######");
-    println!("##### here #######");
-    println!("##### here #######");
-    println!("##### here #######");
-    println!("##### here #######");
-
     let mut git_add_vec = vec![];
     for (fname, content) in new_card_files_content {
         let file_path = card_id.join(fname);
         let file_path_str = file_path.to_str().unwrap();
-        println!("##### before write ");
-        write(&file_path, &content).with_context(|| {
-            format!(
-                "Failed to write content to file '{}'. Content: {}",
-                file_path.display(),
-                content
-            )
-        })?;
-        println!("##### after write ");
+        write_file_contents(&file_path, &content)?;
         git_add_vec.push(file_path_str.to_string());
     }
 
-    let git_add_str = git_add_vec.join(" ");
+    git_add_files(&git_add_vec)?;
+
     let git_commit_msg = git_commit_msg_ripc_new(card_id.to_str().unwrap());
-    run_cmd!(git add "$git_add_str")?;
     run_cmd!(git commit -m "$git_commit_msg")?;
 
     Ok(())

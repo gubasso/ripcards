@@ -3,6 +3,7 @@ use std::{
     env::{current_dir, set_current_dir},
     fs::{create_dir_all, read_to_string, write},
     path::{Path, PathBuf},
+    process::Command,
 };
 
 use anyhow::{anyhow, bail, Result};
@@ -10,11 +11,37 @@ use walkdir::WalkDir;
 
 use crate::{methods::Method, msgs::error::ERROR_MSG_NOT_PROJECT_ROOT};
 
+pub fn git_add_files<P: AsRef<Path>>(path: &[P]) -> Result<()> {
+    let paths_str: Vec<String> = path
+        .iter()
+        .map(|p| p.as_ref().to_string_lossy().into_owned())
+        .collect();
+
+    let output = Command::new("git")
+        .arg("add")
+        .args(&paths_str)
+        .output()
+        .map_err(|e| anyhow!("Failed to execute 'git add' command: {}", e))?;
+
+    if !output.status.success() {
+        bail!(
+            "'git add' command failed with status code: {}\nError: {}\nOutput: {}",
+            output.status,
+            String::from_utf8_lossy(&output.stderr),
+            String::from_utf8_lossy(&output.stdout),
+        );
+    }
+
+    Ok(())
+}
+
 pub fn write_file_contents<P, C>(path: P, contents: C) -> Result<()>
 where
     P: AsRef<Path>,
     C: AsRef<[u8]>,
 {
+    let parent_dir = path.as_ref().parent().unwrap();
+    create_directory(parent_dir)?;
     write(&path, contents).map_err(|e| {
         anyhow!(
             "Failed to write content to file '{}'. Error: {}.",

@@ -3,7 +3,7 @@ mod common;
 use std::{
     collections::HashSet,
     env::current_dir,
-    fs::{create_dir, write, File},
+    fs::{create_dir, File},
     path::Path,
 };
 
@@ -13,7 +13,8 @@ use anyhow::Result;
 use ripcards::{
     handlers::handle_init,
     utils::{
-        create_directory, find_cards, find_ripc_root, get_relative_path, is_ripc_root, set_curr_dir,
+        create_directory, find_cards, find_ripc_root, get_relative_path, is_ripc_root,
+        set_curr_dir, write_file_contents,
     },
 };
 use tempfile::tempdir;
@@ -132,13 +133,13 @@ fn test_find_cards() -> Result<()> {
     let proj_root = setup_temp_dir_handle_init()?;
     create_mock_dirs()?;
     // no match
-    write("p1/ripcard.toml", "lala")?;
-    write("p1/pa/ripcard.toml", "[method.other]")?;
+    write_file_contents("p1/ripcard.toml", "lala")?;
+    write_file_contents("p1/pa/ripcard.toml", "[method.other]")?;
     // matches
-    write("p1/pb/ripcard.toml", "[method.leitner]")?;
-    write("p1/pa/px/ripcard.toml", "[method.leitner]")?;
-    write("p2/ripcard.toml", "[method.leitner]")?;
-    write("p2/pa/ripcard.toml", "[method.leitner]")?;
+    write_file_contents("p1/pb/ripcard.toml", "[method.leitner]")?;
+    write_file_contents("p1/pa/px/ripcard.toml", "[method.leitner]")?;
+    write_file_contents("p2/ripcard.toml", "[method.leitner]")?;
+    write_file_contents("p2/pa/ripcard.toml", "[method.leitner]")?;
     let cards = find_cards(&proj_root, None)?;
     let correct_matches = HashSet::from([
         proj_root.join("p1/pb").to_path_buf(),

@@ -39,8 +39,8 @@ fn test_find_cards_no_matches() -> Result<()> {
     let (temp_dir, curr_dir) = setup_test_directory()?;
 
     // Create only non-matching files
-    write(curr_dir.join("p1/ripcard.toml"), "lala")?;
-    write(curr_dir.join("p1/pa/ripcard.toml"), "[method.other]")?;
+    write_file_contents(curr_dir.join("p1/ripcard.toml"), "lala")?;
+    write_file_contents(curr_dir.join("p1/pa/ripcard.toml"), "[method.other]")?;
 
     let cards = find_cards(&curr_dir, None)?;
 
