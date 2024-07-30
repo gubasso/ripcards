@@ -1,14 +1,16 @@
-use std::{env::set_current_dir, fs::read_to_string, path::Path};
+use std::{fs::read_to_string, path::Path};
 
 use anyhow::Result;
 use cmd_lib::run_fun;
-use ripcards::{config::Config, handlers::handle_init, msgs::GIT_COMMIT_MSG_RIPC_INIT};
+use ripcards::{
+    config::Config, handlers::handle_init, msgs::GIT_COMMIT_MSG_RIPC_INIT, utils::set_curr_dir,
+};
 use tempfile::tempdir;
 
 #[test]
 fn test_handle_init() -> Result<()> {
     let temp_dir = tempdir()?;
-    set_current_dir(&temp_dir)?;
+    set_curr_dir(&temp_dir)?;
     handle_init()?;
     let gitkeep_path_str = "ripc/sessions/.gitkeep";
     let config_path_str = "ripc/config.toml";

@@ -1,9 +1,7 @@
 # RIPISSUE
 
 
-- each file manipulation must be in functions that will call git
-  - ripc init is integrated with git?
-  - ripc new is integrated with git?
+- implement_git_manipulation_for_ripc_new [[implementgitmanipulationforripcnew-issue]]
 
 - refactor find_cards:
   - return a Card type

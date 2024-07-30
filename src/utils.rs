@@ -1,7 +1,7 @@
 use std::{
     collections::HashSet,
-    env::current_dir,
-    fs::read_to_string,
+    env::{current_dir, set_current_dir},
+    fs::{create_dir_all, read_to_string, write},
     path::{Path, PathBuf},
 };
 
@@ -9,6 +9,50 @@ use anyhow::{anyhow, bail, Result};
 use walkdir::WalkDir;
 
 use crate::{methods::Method, msgs::error::ERROR_MSG_NOT_PROJECT_ROOT};
+
+pub fn write_file_contents<P, C>(path: P, contents: C) -> Result<()>
+where
+    P: AsRef<Path>,
+    C: AsRef<[u8]>,
+{
+    write(&path, contents).map_err(|e| {
+        anyhow!(
+            "Failed to write content to file '{}'. Error: {}.",
+            path.as_ref().display(),
+            e
+        )
+    })
+}
+
+pub fn create_directory<P: AsRef<Path>>(path: P) -> Result<()> {
+    create_dir_all(&path).map_err(|e| {
+        anyhow!(
+            "Filed to create directory '{}'. Error: {}",
+            path.as_ref().display(),
+            e
+        )
+    })
+}
+
+pub fn set_curr_dir<P: AsRef<Path>>(path: P) -> Result<()> {
+    set_current_dir(&path).map_err(|e| {
+        anyhow!(
+            "Filed to set current directory '{}'. Error: {}",
+            path.as_ref().display(),
+            e
+        )
+    })
+}
+
+pub fn get_relative_path(base: &Path, full_path: &Path) -> Option<PathBuf> {
+    full_path.strip_prefix(base).ok().and_then(|p| {
+        if p.as_os_str().is_empty() {
+            None
+        } else {
+            Some(p.to_path_buf())
+        }
+    })
+}
 
 pub fn is_ripc_root(path: &Path) -> bool {
     path.join(".git").is_dir()
