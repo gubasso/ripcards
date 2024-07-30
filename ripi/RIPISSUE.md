@@ -1,6 +1,11 @@
 # RIPISSUE
 
 
+- Implement a Card type
+  - root_path
+  - card_id
+  - full_path
+
 - implement_git_manipulation_for_ripc_new [[implementgitmanipulationforripcnew-issue]]
 
 - refactor find_cards:
