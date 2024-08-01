@@ -10,7 +10,7 @@ pub enum MethodEnum<T> {
 }
 
 pub type Method = MethodEnum<()>;
-pub type MethodCard = MethodEnum<LeitnerCardProperties>;
+pub type CardMethod = MethodEnum<LeitnerCardProperties>;
 pub type MethodConfig = MethodEnum<LeitnerConfigProperties>;
 
 impl Default for Method {
@@ -19,9 +19,9 @@ impl Default for Method {
     }
 }
 
-impl Default for MethodCard {
+impl Default for CardMethod {
     fn default() -> Self {
-        MethodCard::Leitner(LeitnerCardProperties::default())
+        CardMethod::Leitner(LeitnerCardProperties::default())
     }
 }
 

@@ -3,7 +3,7 @@ mod common;
 use std::path::{Path, PathBuf};
 
 use anyhow::{Context, Result};
-use cmd_lib::{run_cmd, run_fun};
+use cmd_lib::run_fun;
 use common::setup_temp_dir_handle_init;
 use ripcards::{
     cli::NewCardArgs,
@@ -34,12 +34,6 @@ fn assert_new_card_files_and_git(card_dir: &Path) -> Result<()> {
         );
         assert!(!out_files_not_added.contains(path_str));
         let card_id = card_dir.to_str().unwrap();
-        println!("{}", card_id);
-        println!("{}", card_id);
-        println!("{}", card_id);
-        println!("{}", card_id);
-        println!("{}", card_id);
-        println!("{}", card_id);
         assert!(out_git_log.contains(&git_commit_msg_ripc_new(card_id)));
     }
 
@@ -56,6 +50,11 @@ fn get_handle_new_card_args() -> [NewCardArgs; 3] {
             path: Some(PathBuf::from("some/sub/path")),
         },
     ]
+}
+
+#[test]
+fn test_card_new_at_some_sub_path() -> Result<()> {
+    todo!();
 }
 
 #[test]
@@ -139,7 +138,7 @@ fn test_handle_new_card_input_path() -> Result<()> {
         path: Some(some_card_path.clone()),
     };
     handle_new_card(&args)?;
-    let new_card_abs_path = proj_root.join(&some_card_path);
+    let _new_card_abs_path = proj_root.join(&some_card_path);
 
     assert_new_card_files_and_git(&some_card_path)?;
     Ok(())
@@ -148,7 +147,7 @@ fn test_handle_new_card_input_path() -> Result<()> {
 #[test]
 fn test_handle_new_card_input_dot_path() -> Result<()> {
     let proj_root = setup_temp_dir_handle_init()?;
-    let path_cmd_executed = proj_root.join("some/card/path");
+    let _path_cmd_executed = proj_root.join("some/card/path");
 
     // create_directory(&some_card_path)?;
     // set_curr_dir(&some_card_path)?;

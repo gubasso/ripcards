@@ -2,6 +2,8 @@ use std::path::PathBuf;
 
 use clap::{Args, Parser, Subcommand, ValueEnum};
 
+use crate::utils::validate_relative_path;
+
 /// RipCards: Flash Cards for your terminal
 #[derive(Debug, Parser)]
 #[command(
@@ -29,8 +31,9 @@ pub enum Subcommands {
 
 #[derive(Debug, Args)]
 pub struct NewCardArgs {
-    /// Path of the dir that will be set as a card. If not specified, executes
+    /// Relative path of the dir that will be set as a card. If not specified, executes
     /// in the current dir (where the command is executed)
+    #[clap(value_parser = validate_relative_path)]
     pub path: Option<PathBuf>,
 }
 

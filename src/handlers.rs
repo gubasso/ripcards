@@ -1,6 +1,6 @@
-use std::{env::current_dir, fs::File, path::PathBuf};
+use std::{env::current_dir, fs::File};
 
-use anyhow::{anyhow, bail, Context, Result};
+use anyhow::Result;
 use cmd_lib::run_cmd;
 
 use crate::{
@@ -8,9 +8,7 @@ use crate::{
     cli::{NewCardArgs, SessionMethodArgs, SessionProgressArgs},
     config::Config,
     msgs::{git_commit_msg_ripc_new, GIT_COMMIT_MSG_RIPC_INIT},
-    utils::{
-        create_directory, find_ripc_root, get_relative_path, git_add_files, write_file_contents,
-    },
+    utils::{create_directory, find_ripc_root, git_add_files, write_file_contents},
 };
 
 pub fn handle_init() -> Result<()> {
@@ -29,48 +27,13 @@ pub fn handle_init() -> Result<()> {
 }
 
 pub fn handle_new_card(args: &NewCardArgs) -> Result<()> {
-    let curr_dir_abs_path = current_dir().context("handle_new_card: Failed to get current_dir")?;
-    let dot_dir = PathBuf::from(".");
-    let new_card_rel_path_arg = args.path.as_ref().unwrap_or(&dot_dir);
-    let root_path = find_ripc_root()?;
-    let new_card_abs_path = if new_card_rel_path_arg == &dot_dir {
-        curr_dir_abs_path
-    } else {
-        root_path.join(new_card_rel_path_arg)
-    };
-
-    if root_path == new_card_abs_path {
-        bail!(
-            "Can not create a new card at root of RipCards project. \
-            A card must be a subdirectory inside the RipCards root directory."
-        );
-    }
-
-    create_directory(&new_card_abs_path)?;
-    let card = Card::default();
-    let card_str = toml::to_string(&card)?;
-    let card_id = get_relative_path(&root_path, &new_card_abs_path)
-        .ok_or_else(|| anyhow!("Card id must be a relative path from the project root."))?;
-
-    let new_card_files_content = [
-        ("ripcard.toml", card_str),
-        ("question.md", "# Question\n\n".to_string()),
-        ("answer.md", "# Answer\n\n".to_string()),
-    ];
-
-    let mut git_add_vec = vec![];
-    for (fname, content) in new_card_files_content {
-        let file_path = card_id.join(fname);
-        let file_path_str = file_path.to_str().unwrap();
-        write_file_contents(&file_path, &content)?;
-        git_add_vec.push(file_path_str.to_string());
-    }
-
-    git_add_files(&git_add_vec)?;
-
-    let git_commit_msg = git_commit_msg_ripc_new(card_id.to_str().unwrap());
+    let root = find_ripc_root()?;
+    let curr_dir = current_dir()?;
+    let card = Card::new(root, curr_dir, args)?;
+    let files_rel_path = card.create_card_files()?;
+    git_add_files(&files_rel_path)?;
+    let git_commit_msg = git_commit_msg_ripc_new(card.id().to_str().unwrap());
     run_cmd!(git commit -m "$git_commit_msg")?;
-
     Ok(())
 }
 

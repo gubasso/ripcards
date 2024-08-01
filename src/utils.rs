@@ -71,14 +71,20 @@ pub fn set_curr_dir<P: AsRef<Path>>(path: P) -> Result<()> {
     })
 }
 
-pub fn get_relative_path(base: &Path, full_path: &Path) -> Option<PathBuf> {
-    full_path.strip_prefix(base).ok().and_then(|p| {
-        if p.as_os_str().is_empty() {
-            None
-        } else {
-            Some(p.to_path_buf())
-        }
-    })
+pub fn get_relative_path(base: &Path, full_path: &Path) -> Result<PathBuf> {
+    full_path
+        .strip_prefix(base)
+        .map_err(|e| anyhow!("get_relative_path: Failed to strip prefix. {}", e))
+        .and_then(|rel_path| {
+            if rel_path.as_os_str().is_empty() {
+                bail!(
+                    "get_relative_path: Resulting relative path is empty.\nbase: {}\nfull_path: {}",
+                    base.display(),
+                    full_path.display()
+                )
+            }
+            Ok(rel_path.to_path_buf())
+        })
 }
 
 pub fn is_ripc_root(path: &Path) -> bool {
@@ -125,6 +131,13 @@ pub fn find_cards(root: &Path, method: Option<Method>) -> Result<HashSet<PathBuf
 pub fn assert_git_repo_root() -> Result<()> {
     if !current_dir()?.join(".git").is_dir() {
         bail!(ERROR_MSG_NOT_PROJECT_ROOT);
+    }
+    Ok(())
+}
+
+pub fn validate_relative_path(path: &str) -> Result<(), String> {
+    if !Path::new(path).is_relative() {
+        return Err(String::from("The path must be a relative path"));
     }
     Ok(())
 }

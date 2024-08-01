@@ -43,8 +43,8 @@ fn test_get_relative_path_same_path() -> Result<()> {
     let full_path = base.join(some_sub_dir);
     let relative_path = get_relative_path(&base, &full_path);
     assert!(
-        relative_path.is_none(),
-        "If base and full path are the same, relative path is None."
+        relative_path.is_err(),
+        "If base and full path are the same, relative path is Error."
     );
     Ok(())
 }
@@ -56,8 +56,8 @@ fn test_get_relative_path_base_bigger_than_full() -> Result<()> {
     let full_path = base.join(some_sub_dir);
     let relative_path = get_relative_path(&full_path, &base);
     assert!(
-        relative_path.is_none(),
-        "None if base is a sub dir of full path."
+        relative_path.is_err(),
+        "Error if base is a sub dir of full path."
     );
     Ok(())
 }
@@ -68,8 +68,8 @@ fn test_get_relative_path_different_trees() -> Result<()> {
     let another_dir = Path::new("another/dir/path");
     let relative_path = get_relative_path(base, another_dir);
     assert!(
-        relative_path.is_none(),
-        "None if dirs are from a separate tree (not common ancestor)."
+        relative_path.is_err(),
+        "Error if dirs are from a separate tree (not common ancestor)."
     );
     Ok(())
 }
