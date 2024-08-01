@@ -9,7 +9,7 @@ use ripcards::{
     cli::NewCardArgs,
     handlers::handle_new_card,
     msgs::git_commit_msg_ripc_new,
-    utils::{create_directory, set_curr_dir},
+    utils::{create_directory, set_current_directory},
 };
 use tempfile::tempdir;
 
@@ -53,14 +53,9 @@ fn get_handle_new_card_args() -> [NewCardArgs; 3] {
 }
 
 #[test]
-fn test_card_new_at_some_sub_path() -> Result<()> {
-    todo!();
-}
-
-#[test]
 fn test_handle_new_card_at_root() -> Result<()> {
     let proj_root = setup_temp_dir_handle_init()?;
-    set_curr_dir(&proj_root)?;
+    set_current_directory(&proj_root)?;
 
     let args_arr = get_handle_new_card_args();
 
@@ -117,7 +112,7 @@ fn test_handle_new_card_proj_root() -> Result<()> {
 #[test]
 fn test_handle_new_card_proj_not_initialized() -> Result<()> {
     let temp_dir = tempdir()?;
-    set_curr_dir(&temp_dir)?;
+    set_current_directory(&temp_dir)?;
     let some_card_path = PathBuf::from("some/card");
     let args = NewCardArgs {
         path: Some(some_card_path.clone()),
@@ -168,7 +163,7 @@ fn test_handle_new_card_input_none() -> Result<()> {
     let proj_root = setup_temp_dir_handle_init()?;
     let some_card_path = proj_root.join("some/other/card/path");
     create_directory(&some_card_path)?;
-    set_curr_dir(&some_card_path)?;
+    set_current_directory(&some_card_path)?;
     let args = NewCardArgs { path: None };
     handle_new_card(&args)?;
     assert_new_card_files_and_git(&some_card_path)?;

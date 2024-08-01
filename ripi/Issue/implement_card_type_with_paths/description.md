@@ -6,17 +6,13 @@
 
 ---
 
-Card::new possible scenarios:
-
-```
-- sub/path
-  - . / none -> card_id == some/sub/path
-  - some/sub/path -> card_id == sub/path/some/sub/path
-```
-
-- [x] root -> test_card_new_from_root
-  - . / none -> error
-  - some/sub/path -> card_id == some/sub/path
+- [x] Card::new test all possible scenarios:
+  - [x] sub/path
+    - . / none -> card_id == some/sub/path
+    - some/sub/path -> card_id == sub/path/some/sub/path
+  - [x] root -> test_card_new_from_root
+    - . / none -> error
+    - some/sub/path -> card_id == some/sub/path
 
 handle_new_card possible scenarios:
 

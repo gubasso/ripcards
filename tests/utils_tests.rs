@@ -14,7 +14,7 @@ use ripcards::{
     handlers::handle_init,
     utils::{
         create_directory, find_cards, find_ripc_root, get_relative_path, is_ripc_root,
-        set_curr_dir, write_file_contents,
+        set_current_directory, write_file_contents,
     },
 };
 use tempfile::tempdir;
@@ -77,7 +77,7 @@ fn test_get_relative_path_different_trees() -> Result<()> {
 #[test]
 fn test_is_ripc_root() -> Result<()> {
     let temp_dir = tempdir()?;
-    set_curr_dir(&temp_dir)?;
+    set_current_directory(&temp_dir)?;
     assert!(!is_ripc_root(temp_dir.path()));
     create_dir(".git")?;
     assert!(!is_ripc_root(temp_dir.path()));
@@ -101,27 +101,27 @@ fn test_find_ripc_root() -> Result<()> {
     let some_random_subdir = temp_dir.join("some/random/dir");
     create_directory(&some_random_subdir)?;
 
-    set_curr_dir(&temp_dir)?;
+    set_current_directory(&temp_dir)?;
     let res = find_ripc_root();
     assert!(
         res.is_err(),
         "The RipCards proj root not found. Repository must be initialized."
     );
 
-    set_curr_dir(&some_random_subdir)?;
+    set_current_directory(&some_random_subdir)?;
     let res = find_ripc_root();
     assert!(
         res.is_err(),
         "The RipCards proj root not found. Repository must be initialized."
     );
 
-    set_curr_dir(&temp_dir)?;
+    set_current_directory(&temp_dir)?;
     handle_init()?;
 
     let ripc_root = find_ripc_root()?;
     assert_eq!(ripc_root, temp_dir);
 
-    set_curr_dir(&some_random_subdir)?;
+    set_current_directory(&some_random_subdir)?;
     let ripc_root = find_ripc_root()?;
     assert_eq!(ripc_root, temp_dir);
 

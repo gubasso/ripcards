@@ -54,17 +54,18 @@ where
 pub fn create_directory<P: AsRef<Path>>(path: P) -> Result<()> {
     create_dir_all(&path).map_err(|e| {
         anyhow!(
-            "Filed to create directory '{}'. Error: {}",
+            "Failed to create directory '{}'. Error: {}",
             path.as_ref().display(),
             e
         )
     })
 }
 
-pub fn set_curr_dir<P: AsRef<Path>>(path: P) -> Result<()> {
+pub fn set_current_directory<P: AsRef<Path>>(path: P) -> Result<()> {
+    create_directory(&path)?;
     set_current_dir(&path).map_err(|e| {
         anyhow!(
-            "Filed to set current directory '{}'. Error: {}",
+            "Failed to set current directory '{}'. Error: {}",
             path.as_ref().display(),
             e
         )
@@ -74,7 +75,17 @@ pub fn set_curr_dir<P: AsRef<Path>>(path: P) -> Result<()> {
 pub fn get_relative_path(base: &Path, full_path: &Path) -> Result<PathBuf> {
     full_path
         .strip_prefix(base)
-        .map_err(|e| anyhow!("get_relative_path: Failed to strip prefix. {}", e))
+        .map_err(|e| {
+            anyhow!(
+                "get_relative_path: Failed to strip prefix.\n \
+            base: {}\n \
+            full_path: {}\n \
+            e: {}",
+                base.display(),
+                full_path.display(),
+                e
+            )
+        })
         .and_then(|rel_path| {
             if rel_path.as_os_str().is_empty() {
                 bail!(

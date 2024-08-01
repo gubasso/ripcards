@@ -102,10 +102,16 @@ mod test {
     };
 
     use anyhow::Result;
+    use tempfile::tempdir;
 
-    use crate::{cards::Card, cli::NewCardArgs, methods::CardMethod};
+    use crate::{
+        cards::Card,
+        cli::NewCardArgs,
+        methods::CardMethod,
+        utils::{get_relative_path, set_current_directory},
+    };
 
-    fn get_handle_new_card_args() -> [NewCardArgs; 4] {
+    fn get_handle_new_card_args() -> [NewCardArgs; 3] {
         [
             NewCardArgs { path: None },
             NewCardArgs {
@@ -114,60 +120,60 @@ mod test {
             NewCardArgs {
                 path: Some(PathBuf::from("in/a/card/path")),
             },
-            NewCardArgs {
-                path: Some(PathBuf::from("/absolute/path/as/input")),
-            },
         ]
     }
 
     #[test]
+    fn test_card_new_path_arg_absolute() -> Result<()> {
+        let root = Path::new("/root");
+        let curr_dir = Path::new("/root/curr_dir");
+        let arg = NewCardArgs {
+            path: Some(PathBuf::from("/absolute/path/as/input")),
+        };
+        let res = Card::new(&root, &curr_dir, &arg);
+        assert!(
+            res.is_err(),
+            "test_card_new_path_arg_absolute: Card::new: path parameter \
+                arg '{}' must be relative to the current directory, not absolute.",
+            arg.path.unwrap().display()
+        );
+        Ok(())
+    }
+
+    #[test]
     fn test_card_new_from_root() -> Result<()> {
-        let root = PathBuf::from("/root");
-        let curr_dir = PathBuf::from("/root");
+        let dot_path = PathBuf::from(".");
+        let temp_dir = tempdir()?;
+        let root = temp_dir.into_path();
+        let curr_dir = root.clone();
+        set_current_directory(&curr_dir)?;
         let args_arr = get_handle_new_card_args();
+
         for args in args_arr.iter() {
             let res = Card::new(&root, &curr_dir, args);
-
-            match &args.path {
-                None => {
-                    assert!(
-                        res.is_err(),
-                        "test_card_new_from_root: Card::new must return err if \
-                            card is created at the project root."
-                    );
-                }
-                Some(path) if path == Path::new(".") => {
-                    assert!(
-                        res.is_err(),
-                        "test_card_new_from_root: Card::new must return err if \
-                            card is created at the project root."
-                    );
-                }
-                Some(path) if !path.is_relative() => {
-                    assert!(
-                        res.is_err(),
-                        "test_card_new_from_root: Card::new: path parameter \
-                            arg '{}' must be relative to the current directory",
-                        path.display()
-                    );
-                }
-                Some(_) => {
-                    let card = res?;
-                    let id = PathBuf::from("in/a/card/path");
-                    assert_eq!(
-                        card,
-                        Card {
-                            id: id.clone(),
-                            root: root.clone(),
-                            full_path: root.join(&id),
-                            config_file_rel_path: id.join("ripcard.toml"),
-                            question_file_rel_path: id.join("question.md"),
-                            answer_file_rel_path: id.join("answer.md"),
-                            method: CardMethod::default(),
-                            tags: HashSet::new(),
-                        }
-                    )
-                }
+            let path_args_rel = args.path.as_ref().unwrap_or(&dot_path);
+            if path_args_rel == Path::new(".") {
+                assert!(
+                    res.is_err(),
+                    "test_card_new_from_root: Card::new must return err if \
+                        card is created at the project root."
+                );
+            } else {
+                let card = res?;
+                let id = PathBuf::from("in/a/card/path");
+                assert_eq!(
+                    card,
+                    Card {
+                        id: id.clone(),
+                        root: root.clone(),
+                        full_path: root.join(&id),
+                        config_file_rel_path: id.join("ripcard.toml"),
+                        question_file_rel_path: id.join("question.md"),
+                        answer_file_rel_path: id.join("answer.md"),
+                        method: CardMethod::default(),
+                        tags: HashSet::new(),
+                    }
+                )
             }
         }
 
@@ -176,32 +182,34 @@ mod test {
 
     #[test]
     fn test_card_new_from_sub_path() -> Result<()> {
-        let root = PathBuf::from("/root");
-        let curr_dir = PathBuf::from("/root/sub/path");
+        let dot_path = PathBuf::from(".");
+        let temp_dir = tempdir()?;
+        let root = temp_dir.into_path();
+        let curr_dir = root.join("sub/path/cmd");
+        set_current_directory(&curr_dir)?;
         let args_arr = get_handle_new_card_args();
+
         for args in args_arr.iter() {
             let card = Card::new(&root, &curr_dir, args)?;
-
-            match &args.path {
-                None => {}
-                Some(path) if path == Path::new(".") => {}
-                Some(_) => {
-                    let id_path = PathBuf::from("some/sub/path");
-                    assert_eq!(
-                        card,
-                        Card {
-                            id: id_path.clone(),
-                            root: root.clone(),
-                            full_path: root.join(&id_path),
-                            config_file_rel_path: id_path.join("ripcard.toml"),
-                            question_file_rel_path: id_path.join("question.md"),
-                            answer_file_rel_path: id_path.join("answer.md"),
-                            method: CardMethod::default(),
-                            tags: HashSet::new(),
-                        }
-                    )
+            let path_args_rel = args.path.as_ref().unwrap_or(&dot_path);
+            let id = if path_args_rel == Path::new(".") {
+                get_relative_path(&root, &curr_dir)?
+            } else {
+                PathBuf::from("in/a/card/path")
+            };
+            assert_eq!(
+                card,
+                Card {
+                    id: id.clone(),
+                    root: root.clone(),
+                    full_path: root.join(&id),
+                    config_file_rel_path: id.join("ripcard.toml"),
+                    question_file_rel_path: id.join("question.md"),
+                    answer_file_rel_path: id.join("answer.md"),
+                    method: CardMethod::default(),
+                    tags: HashSet::new(),
                 }
-            }
+            )
         }
 
         Ok(())
