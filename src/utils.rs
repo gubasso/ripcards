@@ -1,15 +1,15 @@
+mod find_cards;
+
 use std::{
-    collections::HashSet,
     env::{current_dir, set_current_dir},
-    fs::{create_dir_all, read_to_string, write},
+    fs::{create_dir_all, write},
     path::{Path, PathBuf},
     process::Command,
 };
 
 use anyhow::{anyhow, bail, Result};
-use walkdir::WalkDir;
 
-use crate::{methods::Method, msgs::error::ERROR_MSG_NOT_PROJECT_ROOT};
+use crate::cli::NewCardArgs;
 
 pub fn git_add_files<P: AsRef<Path>>(path: &[P]) -> Result<()> {
     let paths_str: Vec<String> = path
@@ -41,7 +41,7 @@ where
     C: AsRef<[u8]>,
 {
     let parent_dir = path.as_ref().parent().unwrap();
-    create_directory(parent_dir)?;
+    create_dir(parent_dir)?;
     write(&path, contents).map_err(|e| {
         anyhow!(
             "Failed to write content to file '{}'. Error: {}.",
@@ -51,7 +51,7 @@ where
     })
 }
 
-pub fn create_directory<P: AsRef<Path>>(path: P) -> Result<()> {
+pub fn create_dir<P: AsRef<Path>>(path: P) -> Result<()> {
     create_dir_all(&path).map_err(|e| {
         anyhow!(
             "Failed to create directory '{}'. Error: {}",
@@ -61,8 +61,8 @@ pub fn create_directory<P: AsRef<Path>>(path: P) -> Result<()> {
     })
 }
 
-pub fn set_current_directory<P: AsRef<Path>>(path: P) -> Result<()> {
-    create_directory(&path)?;
+pub fn set_curr_dir<P: AsRef<Path>>(path: P) -> Result<()> {
+    create_dir(&path)?;
     set_current_dir(&path).map_err(|e| {
         anyhow!(
             "Failed to set current directory '{}'. Error: {}",
@@ -117,38 +117,21 @@ pub fn find_ripc_root() -> Result<PathBuf> {
     }
 }
 
-pub fn find_cards(root: &Path, method: Option<Method>) -> Result<HashSet<PathBuf>> {
-    let mut matching_dirs = HashSet::new();
-    let method_str = method.unwrap_or(Method::Leitner(())).to_string();
-    let method_table = format!("[method.{}]", method_str);
-    for entry in WalkDir::new(root)
-        .into_iter()
-        .filter_map(|e| e.ok())
-        .filter(|e| e.file_type().is_file())
-        .filter(|e| e.file_name() == "ripcard.toml")
-    {
-        let content = read_to_string(entry.path())?;
-        println!("{}", content);
-        if content.contains(&method_table) {
-            if let Some(parent_dir) = entry.path().parent() {
-                matching_dirs.insert(parent_dir.to_path_buf());
-            }
-        }
-    }
-    Ok(matching_dirs)
-}
-
-// remove
-pub fn assert_git_repo_root() -> Result<()> {
-    if !current_dir()?.join(".git").is_dir() {
-        bail!(ERROR_MSG_NOT_PROJECT_ROOT);
-    }
-    Ok(())
-}
-
 pub fn validate_relative_path(path: &str) -> Result<(), String> {
     if !Path::new(path).is_relative() {
         return Err(String::from("The path must be a relative path"));
     }
     Ok(())
+}
+
+pub fn get_handle_new_card_args() -> [NewCardArgs; 3] {
+    [
+        NewCardArgs { path: None },
+        NewCardArgs {
+            path: Some(PathBuf::from(".")),
+        },
+        NewCardArgs {
+            path: Some(PathBuf::from("in/a/card/path")),
+        },
+    ]
 }

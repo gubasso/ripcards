@@ -10,7 +10,7 @@ use serde::{Deserialize, Serialize};
 use crate::{
     cli::NewCardArgs,
     methods::CardMethod,
-    utils::{create_directory, get_relative_path, write_file_contents},
+    utils::{self, find_ripc_root},
 };
 
 #[derive(PartialEq, Eq, Hash, Default, Serialize, Deserialize, Debug)]
@@ -18,21 +18,26 @@ struct Tag(String);
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
 pub struct Card {
-    id: PathBuf,
-    root: PathBuf,
-    full_path: PathBuf,
-    config_file_rel_path: PathBuf,
-    question_file_rel_path: PathBuf,
-    answer_file_rel_path: PathBuf,
-    method: CardMethod,
+    properties: CardProperties,
+    methods: Vec<CardMethod>,
+}
+
+#[derive(Serialize, Deserialize, Debug, PartialEq)]
+struct CardProperties {
+    id: CardId,
     tags: HashSet<Tag>,
 }
 
-impl Card {
-    pub fn id(&self) -> &Path {
-        &self.id
+impl CardProperties {
+    pub fn new(id: CardId) -> Self {
+        Self {
+            id,
+            tags: HashSet::new(),
+        }
     }
+}
 
+impl Card {
     pub fn new<P: AsRef<Path>>(root: P, curr_dir: P, args: &NewCardArgs) -> Result<Self> {
         let dot_path = PathBuf::from(".");
         let root = root.as_ref().to_path_buf();
@@ -60,37 +65,69 @@ impl Card {
             root.join(path_arg_rel)
         };
 
-        let id = get_relative_path(&root, &curr_dir_full_path)?;
+        let card_rel_path = utils::get_relative_path(&root, &curr_dir_full_path)?;
+        let id = CardId::from(card_rel_path)?;
 
         Ok(Self {
-            id: id.clone(),
-            root: root.clone(),
-            full_path: root.join(&id),
-            config_file_rel_path: id.join("ripcard.toml"),
-            question_file_rel_path: id.join("question.md"),
-            answer_file_rel_path: id.join("answer.md"),
-            method: CardMethod::default(),
-            tags: HashSet::new(),
+            properties: CardProperties::new(id),
+            methods: vec![CardMethod::default()],
         })
     }
 
-    pub fn create_card_files(&self) -> Result<[PathBuf; 3]> {
-        create_directory(&self.full_path)?;
+    pub fn id(&self) -> &Path {
+        &self.properties.id.0
+    }
 
+    fn full_path(&self) -> Result<PathBuf> {
+        let root = find_ripc_root()?;
+        Ok(root.join(self.id()))
+    }
+
+    pub fn config_file_path_abs(&self) -> Result<PathBuf> {
+        Ok(self.full_path()?.join("ripcard.toml"))
+    }
+    pub fn config_file_path_rel(&self) -> PathBuf {
+        self.id().join("ripcard.toml")
+    }
+
+    pub fn question_file_path_abs(&self) -> Result<PathBuf> {
+        Ok(self.full_path()?.join("question.md"))
+    }
+    pub fn question_file_path_rel(&self) -> PathBuf {
+        self.id().join("question.md")
+    }
+
+    pub fn answer_file_path_abs(&self) -> Result<PathBuf> {
+        Ok(self.full_path()?.join("answer.md"))
+    }
+    pub fn answer_file_path_rel(&self) -> PathBuf {
+        self.id().join("answer.md")
+    }
+
+    pub fn save(&self) -> Result<()> {
+        utils::create_dir(self.full_path()?)?;
         let config_file_content = toml::to_string(&self)?;
-        write_file_contents(&self.config_file_rel_path, config_file_content)?;
-
+        utils::write_file_contents(self.config_file_path_abs()?, config_file_content)?;
         let question_file_content = "# Question\n\n".to_string();
-        write_file_contents(&self.question_file_rel_path, question_file_content)?;
-
+        utils::write_file_contents(self.question_file_path_abs()?, question_file_content)?;
         let answer_file_content = "# Answer\n\n".to_string();
-        write_file_contents(&self.answer_file_rel_path, answer_file_content)?;
+        utils::write_file_contents(self.answer_file_path_abs()?, answer_file_content)?;
+        Ok(())
+    }
+}
 
-        Ok([
-            self.config_file_rel_path.clone(),
-            self.question_file_rel_path.clone(),
-            self.answer_file_rel_path.clone(),
-        ])
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct CardId(PathBuf);
+
+impl CardId {
+    pub fn from<P: AsRef<Path>>(path: P) -> Result<Self> {
+        if path.as_ref().is_absolute() {
+            bail!(
+                "CardId::from: path '{}' must be relative, not absolute.",
+                path.as_ref().display()
+            );
+        }
+        Ok(CardId(path.as_ref().to_path_buf()))
     }
 }
 
@@ -105,22 +142,19 @@ mod test {
     use tempfile::tempdir;
 
     use crate::{
-        cards::Card,
+        cards::{Card, CardId},
         cli::NewCardArgs,
         methods::CardMethod,
-        utils::{get_relative_path, set_current_directory},
+        utils::{self, get_handle_new_card_args, get_relative_path},
     };
 
-    fn get_handle_new_card_args() -> [NewCardArgs; 3] {
-        [
-            NewCardArgs { path: None },
-            NewCardArgs {
-                path: Some(PathBuf::from(".")),
-            },
-            NewCardArgs {
-                path: Some(PathBuf::from("in/a/card/path")),
-            },
-        ]
+    use super::CardProperties;
+
+    fn get_default_card(id: CardId) -> Card {
+        Card {
+            properties: CardProperties::new(id),
+            methods: vec![CardMethod::default()],
+        }
     }
 
     #[test]
@@ -146,7 +180,7 @@ mod test {
         let temp_dir = tempdir()?;
         let root = temp_dir.into_path();
         let curr_dir = root.clone();
-        set_current_directory(&curr_dir)?;
+        utils::set_curr_dir(&curr_dir)?;
         let args_arr = get_handle_new_card_args();
 
         for args in args_arr.iter() {
@@ -160,20 +194,10 @@ mod test {
                 );
             } else {
                 let card = res?;
-                let id = PathBuf::from("in/a/card/path");
-                assert_eq!(
-                    card,
-                    Card {
-                        id: id.clone(),
-                        root: root.clone(),
-                        full_path: root.join(&id),
-                        config_file_rel_path: id.join("ripcard.toml"),
-                        question_file_rel_path: id.join("question.md"),
-                        answer_file_rel_path: id.join("answer.md"),
-                        method: CardMethod::default(),
-                        tags: HashSet::new(),
-                    }
-                )
+                let card_rel_path = PathBuf::from("in/a/card/path");
+                let id = CardId::from(&card_rel_path)?;
+
+                assert_eq!(card, get_default_card(id))
             }
         }
 
@@ -186,30 +210,20 @@ mod test {
         let temp_dir = tempdir()?;
         let root = temp_dir.into_path();
         let curr_dir = root.join("sub/path/cmd");
-        set_current_directory(&curr_dir)?;
+        utils::set_curr_dir(&curr_dir)?;
         let args_arr = get_handle_new_card_args();
 
         for args in args_arr.iter() {
             let card = Card::new(&root, &curr_dir, args)?;
             let path_args_rel = args.path.as_ref().unwrap_or(&dot_path);
-            let id = if path_args_rel == Path::new(".") {
+            let card_rel_path = if path_args_rel == Path::new(".") {
                 get_relative_path(&root, &curr_dir)?
             } else {
                 PathBuf::from("in/a/card/path")
             };
-            assert_eq!(
-                card,
-                Card {
-                    id: id.clone(),
-                    root: root.clone(),
-                    full_path: root.join(&id),
-                    config_file_rel_path: id.join("ripcard.toml"),
-                    question_file_rel_path: id.join("question.md"),
-                    answer_file_rel_path: id.join("answer.md"),
-                    method: CardMethod::default(),
-                    tags: HashSet::new(),
-                }
-            )
+            let id = CardId::from(&card_rel_path)?;
+
+            assert_eq!(card, get_default_card(id))
         }
 
         Ok(())

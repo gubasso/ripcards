@@ -1,15 +1,11 @@
-mod common;
-
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 use anyhow::{Context, Result};
 use cmd_lib::run_fun;
-use common::setup_temp_dir_handle_init;
 use ripcards::{
-    cli::NewCardArgs,
-    handlers::handle_new_card,
+    handlers::{handle_init, handle_new_card},
     msgs::git_commit_msg_ripc_new,
-    utils::{create_directory, set_current_directory},
+    utils::{self, get_handle_new_card_args},
 };
 use tempfile::tempdir;
 
@@ -40,29 +36,19 @@ fn assert_new_card_files_and_git(card_dir: &Path) -> Result<()> {
     Ok(())
 }
 
-fn get_handle_new_card_args() -> [NewCardArgs; 3] {
-    [
-        NewCardArgs { path: None },
-        NewCardArgs {
-            path: Some(PathBuf::from(".")),
-        },
-        NewCardArgs {
-            path: Some(PathBuf::from("some/sub/path")),
-        },
-    ]
-}
-
 #[test]
 fn test_handle_new_card_at_root() -> Result<()> {
-    let proj_root = setup_temp_dir_handle_init()?;
-    set_current_directory(&proj_root)?;
+    let temp_dir = tempdir()?;
+    let root = temp_dir.into_path();
+    utils::set_curr_dir(&root)?;
+    utils::create_dir(".git")?;
+    handle_init()?;
 
     let args_arr = get_handle_new_card_args();
 
     for args in args_arr.iter() {
         let res = handle_new_card(args);
-        let out = run_fun!(git log --oneline)?;
-        println!("\n### GIT LOG\n\n{}\n\n---", out);
+        let _out = run_fun!(git log --oneline)?;
         match &args.path {
             None => {
                 assert!(
@@ -81,91 +67,11 @@ fn test_handle_new_card_at_root() -> Result<()> {
                     "test_handle_new_card_at_root: must create the card correctly at the path: '{}'",
                     path.display()
                 ))?;
-                let new_card_path = proj_root.join(path);
+                let new_card_path = root.join(path);
                 assert_new_card_files_and_git(&new_card_path)?;
             }
         }
     }
 
-    Ok(())
-}
-
-// ----------------------------------------------------
-// ----------------------------------------------------
-// ----------------------------------------------------
-// ----------------------------------------------------
-// ----------------------------------------------------
-// ----------------------------------------------------
-
-#[test]
-fn test_handle_new_card_proj_root() -> Result<()> {
-    let _proj_root = setup_temp_dir_handle_init()?;
-    let args = NewCardArgs { path: None };
-    let res = handle_new_card(&args);
-    assert!(
-        res.is_err(),
-        "Must return err if card is created at the project root."
-    );
-    Ok(())
-}
-
-#[test]
-fn test_handle_new_card_proj_not_initialized() -> Result<()> {
-    let temp_dir = tempdir()?;
-    set_current_directory(&temp_dir)?;
-    let some_card_path = PathBuf::from("some/card");
-    let args = NewCardArgs {
-        path: Some(some_card_path.clone()),
-    };
-    let res = handle_new_card(&args);
-    assert!(
-        res.is_err(),
-        "New card command must return error: RipCards project is not initialized. Didn't find the ripc root dir."
-    );
-    Ok(())
-}
-
-#[test]
-fn test_handle_new_card_input_path() -> Result<()> {
-    let proj_root = setup_temp_dir_handle_init()?;
-    let some_card_path = PathBuf::from("some/card");
-    let args = NewCardArgs {
-        path: Some(some_card_path.clone()),
-    };
-    handle_new_card(&args)?;
-    let _new_card_abs_path = proj_root.join(&some_card_path);
-
-    assert_new_card_files_and_git(&some_card_path)?;
-    Ok(())
-}
-
-#[test]
-fn test_handle_new_card_input_dot_path() -> Result<()> {
-    let proj_root = setup_temp_dir_handle_init()?;
-    let _path_cmd_executed = proj_root.join("some/card/path");
-
-    // create_directory(&some_card_path)?;
-    // set_curr_dir(&some_card_path)?;
-    // let args = NewCardArgs {
-    //     path: Some(PathBuf::from(".")),
-    // };
-    // handle_new_card(&args)?;
-    // run_cmd!(tree)?;
-    // let ripcard_path = proj_root.join(some_card_path).join("ripcard.toml");
-    // println!("{}", ripcard_path.display());
-    // assert!(ripcard_path.is_file());
-    // // assert_new_card_files_and_git(&some_card_path)?;
-    Ok(())
-}
-
-#[test]
-fn test_handle_new_card_input_none() -> Result<()> {
-    let proj_root = setup_temp_dir_handle_init()?;
-    let some_card_path = proj_root.join("some/other/card/path");
-    create_directory(&some_card_path)?;
-    set_current_directory(&some_card_path)?;
-    let args = NewCardArgs { path: None };
-    handle_new_card(&args)?;
-    assert_new_card_files_and_git(&some_card_path)?;
     Ok(())
 }

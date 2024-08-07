@@ -6,6 +6,8 @@
 
 ---
 
+- [x] test_find_cards
+
 - [x] Card::new test all possible scenarios:
   - [x] sub/path
     - . / none -> card_id == some/sub/path
@@ -14,23 +16,17 @@
     - . / none -> error
     - some/sub/path -> card_id == some/sub/path
 
-handle_new_card possible scenarios:
+- [x] Card::save testing
+- [x] Card::save method
 
+- [ ] handle_new_card test all possible scenarios:
+  - [ ] root
+    - . / none -> error
+    - some/sub/path -> card_id == some/sub/path
+  - [ ] sub/path
+    - . / none -> card_id == some/sub/path
+    - some/sub/path -> card_id == sub/path/some/sub/path
 
-```
-- root ->
-  - . / none
-  - some/sub/path
-- not root
-  - . / none
-  - some/sub/path
-- sub/path
-  - . / none
-  - some/sub/path
-```
-
-
-test Card::new()
 
 test card.create_card_files
 
