@@ -7,7 +7,7 @@ use walkdir::WalkDir;
 
 use crate::utils;
 
-pub fn _find_cards_paths(root: &Path) -> HashSet<PathBuf> {
+pub fn find_cards_paths(root: &Path) -> HashSet<PathBuf> {
     let mut matching_dirs = HashSet::new();
     for entry in WalkDir::new(root)
         .into_iter()
@@ -32,7 +32,7 @@ mod test {
 
     use crate::utils;
 
-    use super::_find_cards_paths;
+    use super::find_cards_paths;
 
     #[test]
     fn test_find_cards_empty_directory() -> Result<()> {

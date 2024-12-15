@@ -48,7 +48,7 @@ fn test_handle_new_card_at_root() -> Result<()> {
 
     for args in args_arr.iter() {
         let res = handle_new_card(args);
-        let _out = run_fun!(git log --oneline)?;
+        let out = run_fun!(git log --oneline)?;
         match &args.path {
             None => {
                 assert!(

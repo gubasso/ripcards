@@ -27,8 +27,8 @@ pub fn handle_init() -> Result<()> {
 pub fn handle_new_card(args: &NewCardArgs) -> Result<()> {
     let root = find_ripc_root()?;
     let curr_dir = current_dir()?;
-    let card = Card::new(root, curr_dir, args)?;
-    card.save()?;
+    let card = Card::new(&root, &curr_dir, args)?;
+    card.save(&root)?;
     let files_path_rel = [
         card.config_file_path_rel(),
         card.question_file_path_rel(),

@@ -6,7 +6,7 @@
 
 ---
 
-- [x] test_find_cards
+- [ ] card.save test
 
 - [x] Card::new test all possible scenarios:
   - [x] sub/path
@@ -30,5 +30,7 @@
 
 test card.create_card_files
 
+- [x] review all tests
+- [x] test_find_cards
 - [x] reimplement get_relative_path, encapsulate error (not option, but error)
 - [x] implement create_card_files returning paths of the files created

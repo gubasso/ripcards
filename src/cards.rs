@@ -78,40 +78,39 @@ impl Card {
         &self.properties.id.0
     }
 
-    fn full_path(&self) -> Result<PathBuf> {
-        let root = find_ripc_root()?;
-        Ok(root.join(self.id()))
+    fn full_path(&self, root: &Path) -> PathBuf {
+        root.join(self.id())
     }
 
-    pub fn config_file_path_abs(&self) -> Result<PathBuf> {
-        Ok(self.full_path()?.join("ripcard.toml"))
+    pub fn config_file_path_abs(&self, root: &Path) -> PathBuf {
+        self.full_path(root).join("ripcard.toml")
     }
     pub fn config_file_path_rel(&self) -> PathBuf {
         self.id().join("ripcard.toml")
     }
 
-    pub fn question_file_path_abs(&self) -> Result<PathBuf> {
-        Ok(self.full_path()?.join("question.md"))
+    pub fn question_file_path_abs(&self, root: &Path) -> PathBuf {
+        self.full_path(root).join("question.md")
     }
     pub fn question_file_path_rel(&self) -> PathBuf {
         self.id().join("question.md")
     }
 
-    pub fn answer_file_path_abs(&self) -> Result<PathBuf> {
-        Ok(self.full_path()?.join("answer.md"))
+    pub fn answer_file_path_abs(&self, root: &Path) -> PathBuf {
+        self.full_path(root).join("answer.md")
     }
     pub fn answer_file_path_rel(&self) -> PathBuf {
         self.id().join("answer.md")
     }
 
-    pub fn save(&self) -> Result<()> {
-        utils::create_dir(self.full_path()?)?;
+    pub fn save(&self, root: &Path) -> Result<()> {
+        utils::create_dir(self.full_path(root))?;
         let config_file_content = toml::to_string(&self)?;
-        utils::write_file_contents(self.config_file_path_abs()?, config_file_content)?;
+        utils::write_file_contents(self.config_file_path_abs(root), config_file_content)?;
         let question_file_content = "# Question\n\n".to_string();
-        utils::write_file_contents(self.question_file_path_abs()?, question_file_content)?;
+        utils::write_file_contents(self.question_file_path_abs(root), question_file_content)?;
         let answer_file_content = "# Answer\n\n".to_string();
-        utils::write_file_contents(self.answer_file_path_abs()?, answer_file_content)?;
+        utils::write_file_contents(self.answer_file_path_abs(root), answer_file_content)?;
         Ok(())
     }
 }
@@ -225,6 +224,13 @@ mod test {
 
             assert_eq!(card, get_default_card(id))
         }
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_card_save() -> Result<()> {
+        let root = tempdir()?.into_path();
 
         Ok(())
     }

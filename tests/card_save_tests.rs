@@ -15,7 +15,7 @@ fn test_card_save() -> Result<()> {
         path: Some(PathBuf::from("some/card/path")),
     };
     let card = Card::new(&root, &curr_dir, &arg)?;
-    card.save()?;
+    card.save(root)?;
 
     let card_files = [
         card.config_file_path_rel(),
